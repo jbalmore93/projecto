@@ -1,0 +1,62 @@
+Frontend de Projecto "CAPI"
+El projecto esta especificamente diseñado para la parvularia CAPI, esta diseñado con angular 20.3.18
+, ademas de incluir librerias como primeng 20, primengicons, primengthemes y bootstrap 5.
+
+El projecto cuenta con la estructura siguiente:
+
+1-Environments
+2-Interceptors
+3-Servicios
+4-componentes
+
+1- Environments
+Aqui se encuentran dos archivos los cuales ambos poseen la unica variable de entorno que se esta utilizando,
+los archivos son el productivo y el de desarrollo, la variable que se encuentra es la direccion de la 
+api, la cual se va a consumir, tanto como local y como productiva.
+
+para consumir la api local es :
+ng serve
+
+para consumir la api productiva es:
+ng serve --configuration production
+
+2-Interceptors
+Solo se esta utilizando un Interceptors el cual tiene el cliente http para realizar las peticiones,
+y este mismo captura la cookie de inicio de sesion.
+ 
+3- Servicios
+Se utilizan dos servicios los cuales son:
+Auth: encargado de las funciones con los endpoints para el login y el logout.
+servicio: se encarga de consumir todos los endpoints, aca se encuentran todas las funciones que llaman
+al backend, excepto las del login y logout.
+
+4- Componentes
+*Se encuentran dos componentes fuera de la carpeta sistema los cuales son:
+1-layout
+2-login
+-Los componentes estan distribuidos en la carpeta sistema, los cuales son:
+1-admin
+2-asistencia
+3-bitacora
+4-dashboard
+5-documentos
+6-mis-ninos
+7-ninos
+8-tutor
+
+
+**Rutas 
+Las rutas por ser un projecto de angular se encuentran en el archivo app.routes.ts las cuales se 
+definen de la siguiente manera:
+    / -> componente: login
+    componentonente padre: Layout
+    Hijos:
+      'dashboard'  ->  component: Dashboard 
+      'admin/usuarios' ->  component: Admin 
+      'mis-ninos' -> component: MisNinos
+      'asistencia' -> component: Asistencia
+      'bitacora' -> component: Bitacora
+      'ninos' -> component: Ninos
+      'documentos' -> component: Documentos
+      'notas' -> component: NotasComponent
+      'admin/tutores' ->  component: Tutor

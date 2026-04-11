@@ -1,0 +1,76 @@
+/* You can add global styles to this file, and also import other style files */
+@import "primeicons/primeicons.css";
+html, body {
+  overflow-x: hidden;
+}
+
+.main-content {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.sidebar {
+  width: 70px;
+  min-width: 70px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px;
+  }
+}
+
+.container-fluid {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.p-datatable {
+  width: 100% !important;
+}
+
+.p-datatable-wrapper {
+  overflow-x: auto;
+}
+
+.p-treeselect-panel {
+  z-index: 9999 !important;
+}
+
+.p-datatable {
+  background-color: #ffffff;
+  color: #333;
+}
+
+/* FILAS */
+.p-datatable .p-datatable-tbody > tr {
+  background-color: #ffffff;
+}
+
+/* HOVER (opcional) */
+.p-datatable .p-datatable-tbody > tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* CABECERA */
+.p-datatable .p-datatable-thead > tr > th {
+  background-color: green; 
+  color: #ffffff;
+  border-color: green;
+}
+
+/* BORDES */
+.p-datatable .p-datatable-tbody > tr > td {
+  border-color: #e0e0e0;
+}
+
+
+/* TEXTO DEL BODY */
+.p-datatable .p-datatable-tbody > tr > td {
+  color: #333 !important;
+}
+
+/* TEXTO DE CABECERA (por si acaso) */
+.p-datatable .p-datatable-thead > tr > th {
+  color: #ffffff; /* o negro si cambias el header */
+}

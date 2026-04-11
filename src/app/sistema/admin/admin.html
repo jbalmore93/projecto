@@ -1,0 +1,194 @@
+
+  <!-- HEADER -->
+  <div class="flex align-items-center justify-content-between mb-4">
+    <h4 class="m-0">
+      <i class="pi pi-users text-primary"></i> Gestión de Usuarios
+    </h4>
+<div class="mt-2">
+ <p-button 
+      label="Registrar Usuario"
+      icon="pi pi-plus"
+      [severity]="'success'"
+      (click)="agregar()"
+      >
+    </p-button>
+</div>
+   
+  
+  <!-- LOADING -->
+  <div *ngIf="cargando" class="text-center py-5">
+  <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    <p class="mt-2 text-muted">Cargando usuarios...</p>
+  </div>
+
+  <!-- ERROR -->
+  <p-message *ngIf="error" severity="error" [text]="error"></p-message>
+
+  <!-- TABLA -->
+  <p-table 
+    *ngIf="!cargando && !error"
+    [value]="usuarios"
+    [paginator]="true"
+    [rows]="5"
+    [responsiveLayout]="'scroll'"
+    class="mt-2">
+
+    <!-- HEADER -->
+    <ng-template pTemplate="header">
+      <tr>
+        <th>#</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Estado</th>
+        <th>Intentos</th>
+        <th>Bloqueado</th>
+        <th>Actividad</th>
+      </tr>
+    </ng-template>
+
+    <!-- BODY -->
+    <ng-template pTemplate="body" let-u>
+      <tr>
+        <td>{{ u.IdUsuario }}</td>
+        <td>{{ u.Email }}</td>
+
+        <!-- ROL -->
+        <td>
+          <p-tag 
+            [severity]="
+              u.NombreRole === 'Admin' ? 'danger' :
+              u.NombreRole === 'Maestro' ? 'info' :
+              'success'
+            "
+            [value]="u.NombreRole">
+          </p-tag>
+        </td>
+
+        <!-- ESTADO -->
+        <td>
+          <p-tag 
+            [severity]="u.EstaActivo ? 'success' : 'secondary'"
+            [value]="u.EstaActivo ? 'Activo' : 'Inactivo'">
+          </p-tag>
+        </td>
+
+        <!-- INTENTOS -->
+        <td>
+          <span 
+            [class.text-red-500]="u.IntentosFallidos >= 3"
+            [class.font-bold]="u.IntentosFallidos >= 3">
+            {{ u.IntentosFallidos }}
+          </span>
+        </td>
+
+        <!-- BLOQUEADO -->
+        <td>
+          <span *ngIf="u.BloqueadoHasta" class="text-red-500 text-sm">
+            {{ u.BloqueadoHasta | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+          <span *ngIf="!u.BloqueadoHasta" class="text-color-secondary">—</span>
+        </td>
+
+        <!-- ACTIVIDAD -->
+        <td class="text-sm text-color-secondary">
+          {{ u.UltimaActividad | date:'dd/MM/yyyy HH:mm' }}
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- MODAL USUARIO -->
+<!-- ========================= -->
+
+<p-dialog 
+  [(visible)]="mostrarModalUsuario"
+  header="➕ Nuevo Usuario"
+  [modal]="true"
+  [style]="{ width: '450px' }">
+
+  <form #formUsuario="ngForm" class="grid">
+
+    <!-- EMAIL -->
+    <div class="col-12">
+      <label class="block mb-1">Email</label>
+      <input 
+        pInputText
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        #emailRef="ngModel"
+        required
+        email
+        class="w-full" />
+
+      <small *ngIf="emailRef.invalid && emailRef.touched" class="text-red-500">
+        <span *ngIf="emailRef.errors?.['required']">El email es obligatorio</span>
+        <span *ngIf="emailRef.errors?.['email']">Formato inválido</span>
+      </small>
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="col-12 mt-3">
+      <label class="block mb-1">Contraseña</label>
+      <input 
+        pInputText
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        #passRef="ngModel"
+        required
+        minlength="6"
+        class="w-full" />
+
+      <small *ngIf="passRef.invalid && passRef.touched" class="text-red-500">
+        <span *ngIf="passRef.errors?.['required']">Obligatoria</span>
+        <span *ngIf="passRef.errors?.['minlength']">Mínimo 6 caracteres</span>
+      </small>
+    </div>
+
+    <!-- ROL -->
+    <div class="col-12 mt-3">
+      <label class="block mb-1">Rol</label>
+
+      <p-select
+        [options]="roles"
+        [(ngModel)]="rol"
+        name="rol"
+        #rolRef="ngModel"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccione"
+        appendTo="body"
+        class="w-full"
+        required>
+      </p-select>
+
+      <small *ngIf="rolRef.invalid && rolRef.touched" class="text-red-500">
+        Debe seleccionar un rol
+      </small>
+    </div>
+
+  </form>
+
+  <!-- FOOTER -->
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Cancelar"
+      severity="secondary"
+      (click)="mostrarModalUsuario=false">
+    </p-button>
+
+    <p-button 
+      label="Guardar"
+      severity="success"
+      (click)="guardarUsuario()"
+      [disabled]="formUsuario.invalid">
+    </p-button>
+  </ng-template>
+
+</p-dialog>

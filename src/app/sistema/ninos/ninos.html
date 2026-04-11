@@ -1,0 +1,238 @@
+<div class="mb-4 flex align-items-center justify-content-between">
+    <h4 class="m-0">
+      <i class="pi pi-id-card text-primary"></i> Niños
+    </h4>
+<div class="flex gap-2 mt-2">
+
+    <p-button 
+      icon="pi pi-plus"
+      severity="success"
+      (click)="abrirModalCrear()"
+      label="Registrar Niño"
+      class="m-2">
+    </p-button>
+
+    <p-button 
+      (click)="exportToPDF()"
+      label="Exportar a PDF"
+      icon="pi pi-file-pdf"
+      severity="secondary">
+    </p-button>
+
+  </div>
+  <!-- LOADING -->
+  <div *ngIf="cargando" class="text-center py-5">
+  <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    <p class="mt-2 text-muted">Cargando niños...</p>
+  </div>
+
+  <!-- ERROR -->
+  <p-message *ngIf="error" severity="error" [text]="error"></p-message>
+
+  <!-- TABLA -->
+  <p-table 
+    *ngIf="!cargando && !error"
+    [value]="ninos"
+    [paginator]="true"
+    [rows]="5"
+    [rowsPerPageOptions]="[5,10,20]"
+    [responsiveLayout]="'scroll'"
+    class="p-datatable-sm mt-2">
+
+    <!-- HEADER -->
+    <ng-template pTemplate="header">
+      <tr>
+        <th>#</th>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>Grupo</th>
+        <th>Tutor</th>
+        <th>Alergias</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+
+    <!-- BODY -->
+    <ng-template pTemplate="body" let-n>
+      <tr>
+        <td>{{ n.IdNino }}</td>
+        <td>{{ n.Nombre }}</td>
+        <td>{{ n.Apellido }}</td>
+
+        <td>
+          <p-tag severity="info" [value]="n.Grupo"></p-tag>
+        </td>
+
+        <td>{{ n.TutorNombre }} {{ n.TutorApellido }}</td>
+
+        <td>{{ n.Alergias || '—' }}</td>
+
+        <td class="flex gap-2">
+          <p-button 
+            icon="pi pi-eye"
+            [text]="true"
+            [rounded]="true"
+            [severity]="'info'"
+            (click)="verDetalle(n)">
+          </p-button>
+
+          <p-button 
+            icon="pi pi-pencil"
+            [text]="true"
+            [rounded]="true"
+            [severity]="'warn'"
+            (click)="abrirModalEditar(n)">
+          </p-button>
+
+          <p-button 
+            icon="pi pi-trash"
+            [text]="true"
+            [rounded]="true"
+            [severity]="'danger'"
+            (click)="confirmarEliminar(n)">
+          </p-button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- EMPTY -->
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="text-center p-4">
+          <i class="pi pi-info-circle"></i> No hay niños registrados.
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+<!-- ========================= -->
+<!-- MODAL CREAR / EDITAR -->
+<!-- ========================= -->
+
+<p-dialog 
+  [(visible)]="mostrarModal"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+  [contentStyle]="{ overflow: 'visible' }"
+  [header]="modoEdicion ? '✏️ Editar Niño' : '➕ Registrar Niño'">
+
+  <div class="grid">
+
+    <div class="col-6">
+      <label class="block mb-1">Nombre</label>
+      <input pInputText [(ngModel)]="form.nombre" class="w-full" />
+    </div>
+
+    <div class="col-6">
+      <label class="block mb-1">Apellido</label>
+      <input pInputText [(ngModel)]="form.apellido" class="w-full" />
+    </div>
+
+    <div class="col-12 mt-3">
+      <label class="block mb-1">ID Tutor</label>
+      <input pInputText type="number" [(ngModel)]="form.idTutor" class="w-full" />
+    </div>
+
+    <div class="col-12 mt-3">
+      <label class="block mb-1">Fecha de Nacimiento</label>
+      <p-date-picker 
+        [(ngModel)]="form.fechaNacimiento"
+        dateFormat="dd/mm/yy"
+        class="w-full">
+      </p-date-picker>
+    </div>
+
+    <div class="col-12 mt-3">
+      <label class="block mb-1">Grupo</label>
+     <p-select 
+  [options]="grupos"
+  [(ngModel)]="form.grupo"
+  optionLabel="label"
+  optionValue="value"
+  appendTo="body"
+  class="w-full">
+</p-select>
+    </div>
+
+    <div class="col-12 mt-3">
+      <label class="block mb-1">Alergias</label>
+      <input pInputText [(ngModel)]="form.alergias" class="w-full" />
+    </div>
+
+    <div class="col-12 mt-3">
+      <p-message *ngIf="errorForm" severity="error" [text]="errorForm"></p-message>
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Cancelar"
+      severity="secondary"
+      (click)="mostrarModal=false">
+    </p-button>
+
+    <p-button 
+      [label]="modoEdicion ? 'Actualizar' : 'Guardar'"
+      [severity]="modoEdicion ? 'warn' : 'success'"
+      (click)="guardarNino()"
+      [disabled]="!form.idTutor || !form.nombre || !form.apellido || !form.fechaNacimiento || !form.grupo">
+    </p-button>
+  </ng-template>
+
+</p-dialog>
+
+
+<!-- ========================= -->
+<!-- MODAL DETALLE -->
+<!-- ========================= -->
+
+<p-dialog 
+  [(visible)]="mostrarDetalle"
+  header="Detalle del Niño"
+  [modal]="true"
+  [style]="{ width: '400px' }">
+
+  <div *ngIf="ninoSeleccionado" class="grid">
+
+    <div class="col-6">
+      <small class="text-color-secondary">Nombre</small>
+      <div>{{ ninoSeleccionado.Nombre }}</div>
+    </div>
+
+    <div class="col-6">
+      <small class="text-color-secondary">Apellido</small>
+      <div>{{ ninoSeleccionado.Apellido }}</div>
+    </div>
+
+    <div class="col-6 mt-3">
+      <small class="text-color-secondary">Fecha</small>
+      <div>{{ ninoSeleccionado.FechaNacimiento | date:'dd/MM/yyyy' }}</div>
+    </div>
+
+    <div class="col-6 mt-3">
+      <small class="text-color-secondary">Grupo</small>
+      <p-tag severity="info" [value]="ninoSeleccionado.Grupo"></p-tag>
+    </div>
+
+    <div class="col-12 mt-3">
+      <small class="text-color-secondary">Tutor</small>
+      <div>{{ ninoSeleccionado.TutorNombre }} {{ ninoSeleccionado.TutorApellido }}</div>
+    </div>
+
+    <div class="col-12 mt-3">
+      <small class="text-color-secondary">Alergias</small>
+      <div>{{ ninoSeleccionado.Alergias || '—' }}</div>
+    </div>
+
+  </div>
+
+</p-dialog>
+
+
+<!-- ========================= -->
+<!-- CONFIRMAR ELIMINAR -->
+<!-- ========================= -->
+
+<p-confirmDialog></p-confirmDialog>

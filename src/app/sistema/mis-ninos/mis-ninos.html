@@ -1,0 +1,200 @@
+<div class="container-fluid py-3">
+
+  <h4 class="mb-4 text-center text-md-start">👨‍👩‍👧 Mi Familia</h4>
+
+  <!-- CARGANDO -->
+  <div *ngIf="cargando" class="text-center py-5">
+    <div class="spinner-border text-success"></div>
+    <p class="mt-2 text-muted">Cargando información...</p>
+  </div>
+
+  <!-- ERROR -->
+  <div *ngIf="error" class="alert alert-danger text-center">
+    {{ error }}
+  </div>
+
+  <!-- CONTENIDO -->
+  <div *ngIf="!cargando && !error">
+
+    <!-- TARJETA TUTOR -->
+    <div *ngIf="tutor" class="card shadow-sm mb-4">
+      <div class="card-header bg-dark text-white text-center text-md-start">
+        <strong>👤 Datos del Tutor</strong>
+      </div>
+
+      <div class="card-body">
+        <div class="row g-3">
+
+          <div class="col-12 col-md-4">
+            <small class="text-muted d-block">Nombre</small>
+            <span>{{ tutor.nombre }} {{ tutor.apellido }}</span>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <small class="text-muted d-block">Teléfono</small>
+            <span>{{ tutor.telefono }}</span>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <small class="text-muted d-block">Dirección</small>
+            <span>{{ tutor.direccion }}</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA NIÑOS -->
+    <div class="card shadow-sm mt-2">
+      <div class="card-header bg-dark text-white text-center text-md-start">
+        <strong>🧒 Niños Registrados</strong>
+      </div>
+
+      <div class="card-body p-0">
+
+        <!-- SIN DATOS -->
+        <div *ngIf="ninos.length === 0" class="text-center text-muted py-4">
+          No hay niños registrados.
+        </div>
+
+        <!-- TABLA PRIMENG -->
+        <p-table 
+          *ngIf="ninos.length > 0"
+          [value]="ninos"
+          [paginator]="true"
+          [rows]="5"
+          [rowsPerPageOptions]="[5,10,20]"
+          [scrollable]="true"
+          scrollHeight="400px"
+          responsiveLayout="scroll"
+          class="p-datatable-sm"
+          style="width: 100%"
+        >
+
+          <!-- HEADER -->
+          <ng-template pTemplate="header">
+            <tr>
+              <th>#</th>
+              <th pSortableColumn="Nombre">
+                Nombre <p-sortIcon field="Nombre"></p-sortIcon>
+              </th>
+              <th pSortableColumn="Apellido">
+                Apellido <p-sortIcon field="Apellido"></p-sortIcon>
+              </th>
+              <th>Fecha</th>
+              <th>Grupo</th>
+              <th>Alergias</th>
+              <th>Bitácora</th>
+            </tr>
+          </ng-template>
+
+          <!-- BODY -->
+          <ng-template pTemplate="body" let-n>
+            <tr>
+              <td>{{ n.IdNino }}</td>
+              <td>{{ n.Nombre }}</td>
+              <td>{{ n.Apellido }}</td>
+              <td>{{ n.FechaNacimiento | date:'dd/MM/yyyy' }}</td>
+
+              <td>
+                <span class="p-tag p-tag-success">
+                  {{ n.Grupo }}
+                </span>
+              </td>
+
+              <td>
+                <span *ngIf="n.Alergias" class="p-tag p-tag-warning">
+                  ⚠️ {{ n.Alergias }}
+                </span>
+                <span *ngIf="!n.Alergias" class="text-muted">—</span>
+              </td>
+
+              <td>
+                <button 
+                  pButton 
+                  type="button"
+                  class="p-button-sm p-button-outlined"
+                  icon="pi pi-book"
+                  (click)="verBitacora(n)">
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+
+        </p-table>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL BITACORA -->
+<div class="modal fade" id="modalBitacora" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title text-center w-100">
+          📒 {{ ninoSeleccionado?.Nombre }} {{ ninoSeleccionado?.Apellido }}
+        </h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- CARGANDO -->
+        <div *ngIf="cargandoBitacora" class="text-center py-4">
+          <div class="spinner-border text-primary"></div>
+          <p class="mt-2 text-muted">Cargando bitácora...</p>
+        </div>
+
+        <!-- SIN DATOS -->
+        <div *ngIf="!cargandoBitacora && bitacora.length === 0" class="text-center text-muted py-4">
+          No hay registros en la bitácora.
+        </div>
+
+        <!-- TABLA -->
+        <div *ngIf="!cargandoBitacora && bitacora.length > 0" class="table-responsive">
+          <table class="table table-sm table-hover">
+
+            <thead class="table-dark">
+              <tr>
+                <th>Fecha</th>
+                <th>Comida</th>
+                <th>Siesta</th>
+                <th>Estado</th>
+                <th>Observaciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let b of bitacora">
+                <td>{{ b.Fecha | date:'dd/MM/yyyy' }}</td>
+                <td>{{ b.Comida ? 'Sí' : 'No' }}</td>
+                <td>{{ b.SiestaMinutos ?? '—' }}</td>
+
+                <td>
+                  <span class="badge" [ngClass]="estadoClase(b.EstadoAnimo)">
+                    {{ b.EstadoAnimo || 'Sin info' }}
+                  </span>
+                </td>
+
+                <td>{{ b.Observaciones || 'Sin observaciones' }}</td>
+              </tr>
+            </tbody>
+
+          </table>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary w-100" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

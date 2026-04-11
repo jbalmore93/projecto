@@ -1,0 +1,166 @@
+<div class="p-3">
+
+  <!-- HEADER -->
+  <div class="flex align-items-center justify-content-between mb-4">
+    <h4 class="m-0">
+      <i class="pi pi-book text-primary"></i> Bitácora Diaria
+    </h4>
+    <p-button
+      label="Registrar Bitácora"
+      icon="pi pi-plus"
+      severity="success"
+      (click)="abrirModal()">
+    </p-button>
+  </div>
+
+  <!-- CARGANDO -->
+  <div *ngIf="cargando" class="text-center py-5">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    <p class="mt-2 text-muted">Cargando bitácora...</p>
+  </div>
+
+  <!-- ERROR -->
+  <p-message *ngIf="error" severity="error" [text]="error" class="w-full mb-3"></p-message>
+
+  <!-- TABLA -->
+  <div *ngIf="!cargando && !error">
+    <div class="surface-card border-round-xl shadow-2 p-3 md:p-4">
+
+      <p-table
+        [value]="bitacoras"
+        [paginator]="true"
+        [rows]="5"
+        [rowsPerPageOptions]="[5, 10, 20]"
+        responsiveLayout="scroll"
+        styleClass="p-datatable-sm p-datatable-gridlines">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 60px;">#</th>
+            <th>Niño</th>
+            <th>Fecha</th>
+            <th style="width: 80px; text-align:center;">Comió</th>
+            <th>Siesta (min)</th>
+            <th>Estado de Ánimo</th>
+            <th>Observaciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-a let-i="rowIndex">
+          <tr>
+            <td>{{ a.IdLog }}</td>
+            <td>{{ a.NinoNombre }} {{ a.NinoApellido }}</td>
+            <td>{{ a.Fecha | date:'dd/MM/yyyy' }}</td>
+            <td style="text-align:center;">
+              <i class="pi"
+                 [ngClass]="a.Comida ? 'pi-check-circle' : 'pi-times-circle'"
+                 [style.color]="a.Comida ? '#1D9E75' : '#e24c4c'">
+              </i>
+            </td>
+            <td>{{ a.SiestaMinutos }}</td>
+            <td>
+              <p-tag [value]="a.EstadoAnimo" severity="info"></p-tag>
+            </td>
+            <td>{{ a.Observaciones }}</td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center p-4 text-color-secondary">
+              <i class="pi pi-info-circle mr-2"></i>No hay registros de bitácora.
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </div>
+
+    <!-- MENSAJE ÉXITO -->
+    <div class="mt-3">
+      <p-message *ngIf="mensaje" severity="success" [text]="mensaje"></p-message>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- MODAL REGISTRAR BITÁCORA  -->
+<!-- ========================= -->
+<p-dialog
+  [(visible)]="mostrarModal"
+  header="Registrar Bitácora"
+  [modal]="true"
+  [style]="{ width: '520px' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <div class="pt-2">
+
+    <p-message *ngIf="errorModal" severity="error" [text]="errorModal" class="mb-3"></p-message>
+
+    <div class="grid">
+
+      <!-- ID NIÑO -->
+      <div class="col-12 md:col-6">
+        <label class="block mb-2 text-sm font-medium text-color-secondary">ID Niño</label>
+        <input pInputText type="number"
+               [(ngModel)]="bitacora.idNino"
+               placeholder="Ej: 1042"
+               class="w-full" />
+      </div>
+
+      <!-- SIESTA -->
+      <div class="col-12 md:col-6">
+        <label class="block mb-2 text-sm font-medium text-color-secondary">😴 Siesta (minutos)</label>
+        <input pInputText type="number"
+               [(ngModel)]="bitacora.siestaMinutos"
+               class="w-full" />
+      </div>
+
+      <!-- ESTADO DE ÁNIMO -->
+      <div class="col-12 md:col-6">
+        <label class="block mb-2 text-sm font-medium text-color-secondary">🙂 Estado de Ánimo</label>
+        <p-select
+          [options]="estadosAnimo"
+          [(ngModel)]="bitacora.estadoAnimo"
+          placeholder="Seleccione"
+          optionLabel="label"
+          optionValue="value"
+          class="w-full">
+        </p-select>
+      </div>
+
+      <!-- COMIÓ -->
+      <div class="col-12 md:col-6 flex align-items-end">
+        <div class="flex align-items-center gap-2 p-3 border-round-lg w-full"
+             style="background: var(--surface-ground); border: 1px solid var(--surface-border);">
+          <p-checkbox [(ngModel)]="bitacora.comida" [binary]="true" inputId="comida"></p-checkbox>
+          <label for="comida" class="text-sm font-medium m-0 cursor-pointer">🍽️ ¿Comió?</label>
+        </div>
+      </div>
+
+      <!-- OBSERVACIONES -->
+      <div class="col-12">
+        <label class="block mb-2 text-sm font-medium text-color-secondary">📋 Observaciones</label>
+        <textarea pInputTextarea rows="3"
+                  [(ngModel)]="bitacora.observaciones"
+                  placeholder="Escribe observaciones del día..."
+                  class="w-full">
+        </textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" [text]="true"
+              (click)="mostrarModal = false"></p-button>
+    <p-button label="Guardar Bitácora" icon="pi pi-save" severity="success"
+              [loading]="guardando"
+              [disabled]="!bitacora.idNino"
+              (click)="guardar()">
+    </p-button>
+  </ng-template>
+
+</p-dialog>

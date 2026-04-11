@@ -1,0 +1,135 @@
+<div class="p-2">
+
+  <!-- HEADER -->
+  <div class="flex align-items-center justify-content-between mb-4">
+    <h4 class="m-0">
+      <i class="pi pi-users text-primary"></i> Tutores
+    </h4>
+    <p-button
+      label="Registrar Tutor"
+      icon="pi pi-plus"
+      severity="success"
+      (click)="nuevo()"
+      class="mt-2">
+    </p-button>
+  </div>
+
+  <!-- CARGANDO -->
+  <div *ngIf="cargando" class="text-center py-5">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    <p class="mt-2 text-color-secondary">Cargando tutores...</p>
+  </div>
+
+  <!-- TABLA -->
+  <div *ngIf="!cargando">
+    <div class="surface-card border-round-xl shadow-2 p-3 md:p-2">
+
+      <p-table
+        [value]="tutores"
+        [paginator]="true"
+        [rows]="5"
+        [rowsPerPageOptions]="[5, 10, 20]"
+        responsiveLayout="scroll"
+        showGridlines [tableStyle]="{ 'min-width': '50rem' }"
+        styleClass="p-datatable-sm p-datatable-gridlines"
+        sortMode="multiple">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width:60px;">#</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Dirección</th>
+            <th style="width:100px; text-align:center;">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-t let-i="rowIndex">
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ t.nombre }}</td>
+            <td>{{ t.apellido }}</td>
+            <td>{{ t.email }}</td>
+            <td>{{ t.telefono }}</td>
+            <td>{{ t.direccion }}</td>
+            <td style="text-align:center;">
+              <div class="flex gap-1 justify-content-center">
+                <p-button icon="pi pi-pencil" severity="secondary" [text]="true"
+                          (click)="editar(t)" pTooltip="Editar"></p-button>
+                <p-button icon="pi pi-trash" severity="danger" [text]="true"
+                          (click)="eliminar(t.idTutor)" pTooltip="Eliminar"></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center p-4 text-color-secondary">
+              <i class="pi pi-info-circle mr-2"></i>No hay tutores registrados.
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- MODAL TUTOR               -->
+<!-- ========================= -->
+<p-dialog
+  [(visible)]="mostrarModal"
+  [header]="editando ? 'Editar Tutor' : 'Nuevo Tutor'"
+  [modal]="true"
+  [style]="{width: '480px'}"
+  [draggable]="false"
+  [resizable]="false">
+
+  <div class="pt-2">
+
+    <p-message *ngIf="errorModal" severity="error" [text]="errorModal" class="w-full mb-3"></p-message>
+
+    <div class="grid">
+
+      <div class="col-12 md:col-6">
+        <label class="block mb-2 text-sm font-medium text-color-secondary">ID Usuario</label>
+        <input pInputText [(ngModel)]="tutor.idUsuario" class="w-full" />
+      </div>
+
+      <div class="col-12 md:col-6">
+        <label class="block mb-2 text-sm font-medium text-color-secondary">Teléfono</label>
+        <input pInputText [(ngModel)]="tutor.telefono" class="w-full" />
+      </div>
+
+      <div class="col-12 md:col-6">
+        <label class="block mb-2 text-sm font-medium text-color-secondary">Nombre</label>
+        <input pInputText [(ngModel)]="tutor.nombre" class="w-full" />
+      </div>
+
+      <div class="col-12 md:col-6">
+        <label class="block mb-2 text-sm font-medium text-color-secondary">Apellido</label>
+        <input pInputText [(ngModel)]="tutor.apellido" class="w-full" />
+      </div>
+
+      <div class="col-12">
+        <label class="block mb-2 text-sm font-medium text-color-secondary">Dirección</label>
+        <input pInputText [(ngModel)]="tutor.direccion" class="w-full" />
+      </div>
+
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" [text]="true"
+              (click)="mostrarModal = false"></p-button>
+    <p-button label="Guardar" icon="pi pi-save" severity="success"
+              [loading]="guardando"
+              (click)="guardar()"></p-button>
+  </ng-template>
+
+</p-dialog>

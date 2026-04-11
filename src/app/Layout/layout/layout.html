@@ -1,0 +1,118 @@
+<div class="d-flex" style="min-height: 100vh;">
+
+  <!-- SIDEBAR -->
+  <nav class="d-flex flex-column bg-dark text-white p-3" style="width: 70px;">
+
+    <div class="text-center mb-4">
+      <h5 class="fw-bold"><i class="pi pi-building-columns"></i></h5>
+      <span class="badge bg-success mt-1">{{ auth.getUser()?.roleName }}s</span>
+    </div>
+
+    <ul class="nav flex-column gap-1 flex-grow-1">
+
+      <!-- TODOS LOS ROLES -->
+      <li>
+        <a class="nav-link text-white rounded px-3 py-2"
+           routerLink="/sistema/dashboard"
+           routerLinkActive="bg-success">
+        <i class="pi pi-chart-bar"></i>
+        </a>
+      </li>
+
+      <!-- SOLO ADMIN -->
+      <li *ngIf="auth.isAdmin()">
+        <a class="nav-link text-white rounded px-3 py-2"
+           routerLink="/sistema/admin/usuarios"
+           routerLinkActive="bg-success">
+          <i class="pi pi-users"></i> 
+        </a>
+      </li>
+
+      <li *ngIf="auth.isAdmin()">
+        <a class="nav-link text-white rounded px-3 py-2"
+           routerLink="/sistema/admin/tutores"
+           routerLinkActive="bg-success">
+          <i class="pi pi-user"></i> 
+        </a>
+      </li>
+
+      <!-- ADMIN Y MAESTRO -->
+      <li *ngIf="auth.isAdmin() || auth.isMaestro()">
+        <a class="nav-link text-white rounded px-3 py-2"
+           routerLink="/sistema/asistencia"
+           routerLinkActive="bg-success">
+          <i class="pi pi-check"></i> 
+        </a>
+      </li>
+
+ <li *ngIf="auth.isAdmin() || auth.isMaestro()">
+        <a class="nav-link text-white rounded px-3 py-2"
+           routerLink="/sistema/ninos"
+           routerLinkActive="bg-success">
+        <i class="pi pi-id-card"></i>
+        </a>
+      </li>
+
+       <li *ngIf="auth.isAdmin() || auth.isMaestro() || auth.isPadre()">
+        <a class="nav-link text-white rounded px-3 py-2"
+           routerLink="/sistema/documentos"
+           routerLinkActive="bg-success">
+         <i class="pi pi-file"></i>
+        </a>
+      </li>
+      
+      <li *ngIf="auth.isAdmin() || auth.isMaestro()">
+        <a class="nav-link text-white rounded px-3 py-2"
+           routerLink="/sistema/bitacora"
+           routerLinkActive="bg-success">
+        <i class="pi pi-book"></i>
+        </a>
+      </li>
+<li *ngIf="auth.isAdmin() || auth.isMaestro() || auth.isPadre()">
+  <a class="nav-link text-white rounded px-3 py-2"
+     routerLink="/sistema/notas"
+     routerLinkActive="bg-success">
+   <i class="pi pi-list"></i> 
+  </a>
+</li>
+      
+      <li *ngIf="auth.isPadre() || auth.isAdmin()">
+        <a class="nav-link text-white rounded px-3 py-2"
+           routerLink="/sistema/mis-ninos"
+           routerLinkActive="bg-success">
+          <i class="pi pi-heart"></i>
+        </a>
+      </li>
+
+    </ul>
+
+    <!-- LOGOUT -->
+    <div class="mt-auto">
+      <hr class="border-secondary">
+      <button class="btn btn-outline-danger w-100" (click)="logout()">
+        <i class="pi pi-sign-out"></i> 
+      </button>
+    </div>
+
+  </nav>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="flex-grow-1 d-flex flex-column">
+
+    <header class="bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center">
+      <h6 class="mb-0 text-muted">
+        Bienvenido, {{ auth.getUser()?.email }}
+      </h6>
+
+      <span class="badge bg-secondary">
+        {{ auth.getUser()?.roleName }}
+      </span>
+    </header>
+
+    <main class="p-4 bg-light flex-grow-1">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>
