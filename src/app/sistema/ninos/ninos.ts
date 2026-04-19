@@ -18,6 +18,7 @@ import { ConfirmationService } from 'primeng/api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { NinoService } from '../../servicios/nino-service';
+import { Ninos as Nino} from '../../interfaces/nino';
 
 @Component({
   selector: 'app-ninos',
@@ -42,7 +43,7 @@ import { NinoService } from '../../servicios/nino-service';
 })
 export class Ninos implements OnInit {
 
-  ninos: any[] = [];
+  ninos: Nino[] = [];
   cargando = true;
   error = '';
 
@@ -208,26 +209,49 @@ export class Ninos implements OnInit {
     img.src = 'logo.jpeg'; 
   
     img.onload = () => {
-  
+  const pageWidth = pdf.internal.pageSize.getWidth();
     
-      pdf.addImage(img, 'JPEG', 14, 10, 30, 15);
+   pdf.addImage(img, 'JPEG', 14, 8, 25, 20);
   
       
-      pdf.setFontSize(16);
-      pdf.text('Reporte de Niños', 50, 18);
-  
-    
-      pdf.setFontSize(10);
-      pdf.text(
+   pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(
+        'CENTRO DE ATENCION DE PRIMERA INSTANCIA',
+        pageWidth / 2,
+        12,
+        { align: 'center' }
+    );
+    pdf.text(
+        'CAPI "PASITO A PASITO"',
+        pageWidth / 2,
+        18,
+        { align: 'center' }
+    );
+
+    // Subtítulo
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('Reporte de Niños', pageWidth / 2, 25, { align: 'center' });
+
+    // Fecha — abajo a la derecha, sin solaparse
+    pdf.setFontSize(9);
+    pdf.text(
         `Fecha: ${new Date().toLocaleDateString('es-SV')}`,
-        150,
-        15
-      );
+        pageWidth - 14,
+        32,
+        { align: 'right' }
+    );
+
+    // Línea separadora
+    pdf.setLineWidth(0.3);
+    pdf.line(14, 35, pageWidth - 14, 35);
+
   
-      // 📊 Tabla
+      
       autoTable(pdf, {
-        startY: 30,
-        head: [['#', 'ID Niño', 'Entrada', 'Salida', 'Recoge']],
+        startY: 40,
+        head: [['#', 'Nombre', 'Apellido', 'Nivel', 'Alergias']],
         body: this.ninos.map(a => [
           a.IdNino,
           a.Nombre,

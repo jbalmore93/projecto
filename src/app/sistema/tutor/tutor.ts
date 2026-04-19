@@ -127,4 +127,8 @@ editar(t: any) {
     }
   }
 }
+
+soloNumeros(event: KeyboardEvent): boolean {
+  return /[0-9]/.test(event.key);
+}
 }

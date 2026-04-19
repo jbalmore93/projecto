@@ -9,8 +9,15 @@
       label="Registrar Bitácora"
       icon="pi pi-plus"
       severity="success"
-      (click)="abrirModal()">
+      (click)="abrirModal()"
+      class="m-2">
     </p-button>
+
+    <p-button (click)="exportToPDF()"
+           label="Exportar a PDF"
+           icon="pi pi-file-pdf"
+           severity="secondary">
+          </p-button>
   </div>
 
   <!-- CARGANDO -->

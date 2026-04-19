@@ -14,6 +14,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { TooltipModule } from 'primeng/tooltip';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { Nota, NotaConNino } from '../../interfaces/nota';
+import { label } from '@primeuix/themes/aura/metergroup';
+import { value } from '@primeuix/themes/aura/knob';
 
 @Component({
   selector: 'app-notas',
@@ -27,10 +29,13 @@ import { Nota, NotaConNino } from '../../interfaces/nota';
 })
 export class NotasComponent implements OnInit {
 
-  cargando = false;
-  guardando = false;
-  error = '';
-  mensaje = '';
+  cargando : boolean = false;
+  guardando : boolean = false;
+  error : string = '';
+  mensaje : string = '';
+  filtro : string = '';
+  Arreglonivel: { label: string, value: number }[] = [];
+  
 
   filtroIdNino: number | null = null;
 
@@ -92,6 +97,13 @@ ambitoKeyDe(competencia: string): string {
     { label: 'Cuerpo, Movimiento y Bienestar Físico', value: 'cuerpo'   },
   ];
 
+filtros = [
+    { label: 'Niño',      value: '1'   },
+    { label: 'Nivel',         value: '2'  }
+  ];
+
+
+
   // Competencias agrupadas por ámbito
   competenciaOpciones = [
     { label: '🤝 Identidad y Autonomía',                   value: 'Identidad y Autonomía'                   },
@@ -148,6 +160,7 @@ ambitoKeyDe(competencia: string): string {
 
   async ngOnInit() {
     await this.cargarNotas();
+    await this.cargarNiveles();
   }
 
   async cargarNotas() {
@@ -163,6 +176,21 @@ ambitoKeyDe(competencia: string): string {
       this.cargando = false;
     }
   }
+
+  async cargarNiveles() {
+    this.cargando = true;
+    this.error = '';
+    try {
+      this.Arreglonivel = await this.servicio.getniveles();
+      console.log('Niveles cargados:', this.Arreglonivel);
+    } catch (err) {
+      this.error = 'Error al cargar los niveles';
+      console.error(err);
+    } finally {
+      this.cargando = false;
+    }
+  }
+
 
   async buscarPorNino() {
   this.error = '';

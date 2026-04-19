@@ -3,7 +3,6 @@ import { CommonModule, NgIf } from '@angular/common';
 import { Servicio } from '../../servicios/servicio';
 import { FormsModule } from '@angular/forms';
 
-// PrimeNG
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -11,7 +10,6 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { MessageModule } from 'primeng/message';
 
-//Pdf
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -38,21 +36,18 @@ export class Asistencia implements OnInit {
   cargando = true;
   error = '';
 
-  // MODALES
+
   mostrarDetalle = false;
   mostrarCheckout = false;
   mostrarCheckin = false;
 
-  // CHECKOUT
   asistenciaCheckout: any = null;
   personaRecoge: string = '';
   errorCheckout = '';
 
-  // CHECKIN
   idNinoCheckin: number | null = null;
   errorCheckin = '';
 
-  // DETALLE
   asistenciaSeleccionada: any = null;
 
   constructor(private servicio: Servicio) {}
@@ -67,6 +62,8 @@ export class Asistencia implements OnInit {
 
     try {
       this.asistencias = await this.servicio.obtenerAsistencias();
+      console.log('Asistencias cargadas:', this.asistencias);
+      
     } catch (err) {
       this.error = 'Error al cargar las asistencias.';
     } finally {
@@ -75,52 +72,65 @@ export class Asistencia implements OnInit {
   }
 
 exportToPDF(): void {
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
 
-  const pdf = new jsPDF();
+    const img = new Image();
+    img.src = 'logo.jpeg';
 
+    img.onload = () => {
+      
+        pdf.addImage(img, 'JPEG', 14, 8, 25, 20);
 
-  const img = new Image();
-  img.src = 'logo.jpeg'; 
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(
+            'CENTRO DE ATENCION DE PRIMERA INSTANCIA',
+            pageWidth / 2, 12,
+            { align: 'center' }
+        );
+        pdf.text(
+            'CAPI "PASITO A PASITO"',
+            pageWidth / 2, 18,
+            { align: 'center' }
+        );
 
-  img.onload = () => {
+        // Subtítulo
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text('Reporte de Asistencia', pageWidth / 2, 25, { align: 'center' });
 
-  
-    pdf.addImage(img, 'JPEG', 14, 10, 30, 15);
+        // Fecha
+        pdf.setFontSize(9);
+        pdf.text(
+            `Fecha: ${new Date().toLocaleDateString('es-SV')}`,
+            pageWidth - 14, 32,
+            { align: 'right' }
+        );
 
-    
-    pdf.setFontSize(16);
-    pdf.text('Reporte de Asistencia', 50, 18);
+     
+        pdf.setLineWidth(0.3);
+        pdf.line(14, 35, pageWidth - 14, 35);
 
-  
-    pdf.setFontSize(10);
-    pdf.text(
-      `Fecha: ${new Date().toLocaleDateString('es-SV')}`,
-      150,
-      15
-    );
+        // Tabla
+        autoTable(pdf, {
+            startY: 40,
+            head: [['#', 'Nombre', 'Apellido', 'Entrada', 'Salida', 'Recoge']],
+            body: this.asistencias.map(a => [
+                a.IdAsistencia,
+                a.nombre,
+                a.apellido,
+                this.formatearFecha(a.HoraEntrada),
+                a.HoraSalida ? this.formatearFecha(a.HoraSalida) : 'En guardería',
+                a.PersonaRecoge || '—'
+            ]),
+            styles: { fontSize: 9 },
+            headStyles: { fillColor: [41, 128, 185] },
+            theme: 'grid'
+        });
 
-    // 📊 Tabla
-    autoTable(pdf, {
-      startY: 30,
-      head: [['#', 'ID Niño', 'Entrada', 'Salida', 'Recoge']],
-      body: this.asistencias.map(a => [
-        a.IdAsistencia,
-        a.IdNino,
-        this.formatearFecha(a.HoraEntrada),
-        a.HoraSalida ? this.formatearFecha(a.HoraSalida) : 'En guardería',
-        a.PersonaRecoge || '—'
-      ]),
-      styles: {
-        fontSize: 9
-      },
-      headStyles: {
-        fillColor: [41, 128, 185]
-      },
-      theme: 'grid'
-    });
-
-    pdf.save('asistencias.pdf');
-  };
+        pdf.save('asistencias.pdf');
+    };
 }
 
 formatearFecha(fecha: string): string {
@@ -132,10 +142,7 @@ formatearFecha(fecha: string): string {
     minute: '2-digit'
   });
 }
-  // =========================
-  // MODALES
-  // =========================
-
+  
   verDetalle(asistencia: any) {
     this.asistenciaSeleccionada = asistencia;
     this.mostrarDetalle = true;
@@ -154,11 +161,7 @@ formatearFecha(fecha: string): string {
     this.mostrarCheckout = true;
   }
 
-  // =========================
-  // CHECKOUT
-  // =========================
-
-  async registrarCheckout() {
+ async registrarCheckout() {
     try {
       if (!this.asistenciaCheckout) {
         this.errorCheckout = 'No hay asistencia seleccionada';
@@ -190,10 +193,6 @@ formatearFecha(fecha: string): string {
       }
     }
   }
-
-  // =========================
-  // CHECKIN
-  // =========================
 
   async registrarCheckin() {
     try {

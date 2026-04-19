@@ -40,7 +40,8 @@
     <ng-template pTemplate="header">
       <tr>
         <th>#</th>
-        <th>ID Niño</th>
+        <th>Nombre</th>
+        <th>Apellido</th>
         <th>Entrada</th>
         <th>Salida</th>
         <th>Recoge</th>
@@ -51,10 +52,9 @@
     <ng-template pTemplate="body" let-a>
       <tr>
         <td>{{ a.IdAsistencia }}</td>
-        <td>{{ a.IdNino }}</td>
-
+        <td>{{ a.nombre }}</td>
+        <td>{{ a.apellido }}</td>
         <td>{{ a.HoraEntrada | date:'dd/MM/yyyy HH:mm' }}</td>
-
         <td>
           <span *ngIf="a.HoraSalida">
             {{ a.HoraSalida | date:'dd/MM/yyyy HH:mm' }}
@@ -119,9 +119,13 @@
 
     <div class="mb-3">
       <small class="text-color-secondary">ID Niño</small>
-      <div>{{ asistenciaSeleccionada.IdNino }}</div>
+      <div>{{ asistenciaSeleccionada.nombre }}</div>
     </div>
 
+     <div class="mb-3">
+      <small class="text-color-secondary">ID Niño</small>
+      <div>{{ asistenciaSeleccionada.apellido }}</div>
+    </div>
     <div class="mb-3">
       <small class="text-color-secondary">Persona que Recoge</small>
       <div>{{ asistenciaSeleccionada.PersonaRecoge || '—' }}</div>

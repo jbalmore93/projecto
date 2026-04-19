@@ -47,4 +47,14 @@ async getNotasPorNino(idNino: number): Promise<NotaConNino[]> {
   );
 }
 
+async getniveles(): Promise<any[]> {
+    const niveles = await firstValueFrom(
+        this.http.get<any[]>(`niveles`, { withCredentials: true })
+    );
+    return niveles.map(n => ({
+        label: n.nombre_nivel,
+        value: n.id_nivel
+    }));
+}
+
 }

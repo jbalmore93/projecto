@@ -9,6 +9,8 @@ import { Select } from 'primeng/select';
 import { Tag } from 'primeng/tag';
 import { Dialog } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 
 @Component({
@@ -108,5 +110,79 @@ errorModal = '';
   };
   this.errorModal = '';
   this.mostrarModal = true;
+}
+
+exportToPDF(): void {
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+
+    const img = new Image();
+    img.src = 'logo.jpeg';
+
+    img.onload = () => {
+      
+        pdf.addImage(img, 'JPEG', 14, 8, 25, 20);
+
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(
+            'CENTRO DE ATENCION DE PRIMERA INSTANCIA',
+            pageWidth / 2, 12,
+            { align: 'center' }
+        );
+        pdf.text(
+            'CAPI "PASITO A PASITO"',
+            pageWidth / 2, 18,
+            { align: 'center' }
+        );
+
+        // Subtítulo
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text('Reporte de Bitácora', pageWidth / 2, 25, { align: 'center' });
+
+        // Fecha
+        pdf.setFontSize(9);
+        pdf.text(
+            `Fecha: ${new Date().toLocaleDateString('es-SV')}`,
+            pageWidth - 14, 32,
+            { align: 'right' }
+        );
+
+     
+        pdf.setLineWidth(0.3);
+        pdf.line(14, 35, pageWidth - 14, 35);
+
+        // Tabla
+        autoTable(pdf, {
+            startY: 40,
+            head: [['#', 'Nombre', 'Apellido', 'Fecha', 'Comió', 'Siesta', 'Ánimo', 'Observaciones']],
+            body: this.bitacoras.map(a => [
+                a.IdLog,
+                a.NinoNombre,
+                a.NinoApellido,
+                this.formatearFecha(a.Fecha),
+                a.Comida ? 'Sí' : 'No',
+                a.SiestaMinutos  || '—',
+                a.EstadoAnimo || '—',
+                a.Observaciones || '—'
+            ]),
+            styles: { fontSize: 9 },
+            headStyles: { fillColor: [41, 128, 185] },
+            theme: 'grid'
+        });
+
+        pdf.save('bitacoras.pdf');
+    };
+}
+
+formatearFecha(fecha: string): string {
+  return new Date(fecha).toLocaleString('es-SV', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }
 }

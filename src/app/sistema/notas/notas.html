@@ -33,8 +33,19 @@
 
     <!-- CARD TABLA -->
     <div class="surface-card border-round-xl shadow-2 p-3 md:p-4">
+        <label class="block mb-2 text-sm font-medium text-color-secondary">
+        Filtrar por:
+      </label>
+      <p-select
+        [options]="filtros"
+        [(ngModel)]="filtro"
+        placeholder="Seleccione el filtro"
+        optionLabel="label"
+        optionValue="value"
+        class="w-full">
+      </p-select>
       <!-- FILTROS -->
-     <div class="grid mb-3">
+     <div class="grid mb-3 mt-2" *ngIf="filtro === '1'">
   <div class="col-12 md:col-4">
     <span class="p-input-icon-left w-full">
       <p-floatlabel variant="on">
@@ -47,11 +58,23 @@
     </p-floatlabel>
     </span>
   </div>
+ </div>
+       <div class="grid mb-3 mt-2" *ngIf="filtro === '2'">
+  <div class="col-12 md:col-4">
+     <p-select
+        [options]="Arreglonivel"
+        placeholder="Seleccione el Nivel"
+        optionLabel="label"
+        optionValue="value"
+        class="w-full">
+      </p-select>
+  </div>
 </div>
 
       <!-- TABLA -->
       <p-table
         [value]="notasFiltradas"
+        class="mt-2"
         [paginator]="true"
         [rows]="10"
         [rowsPerPageOptions]="[5, 10, 20]"
@@ -141,8 +164,23 @@
              placeholder="Ej: 1042" class="w-full" />
     </div>
 
+    <!-- Nivel -->
+    <div class="field mb-0 mt-2">
+      <label class="block mb-2 text-sm font-medium text-color-secondary">
+        Nivel <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        [options]="Arreglonivel"
+        [(ngModel)]="form.competencia"
+        placeholder="Seleccione un Nivel"
+        optionLabel="label"
+        optionValue="value"
+        class="w-full">
+      </p-select>
+    </div>
+    
     <!-- COMPETENCIA -->
-    <div class="field mb-0">
+    <div class="field mb-0 mt-2">
       <label class="block mb-2 text-sm font-medium text-color-secondary">
         Competencia <span class="text-red-500">*</span>
       </label>
@@ -151,13 +189,14 @@
         [(ngModel)]="form.competencia"
         placeholder="Seleccione una competencia"
         optionLabel="label"
+        appendTo="body"
         optionValue="value"
         class="w-full">
       </p-select>
     </div>
 
     <!-- NOTA -->
-    <div class="field mb-0">
+    <div class="field mb-0 mt-2">
       <label class="block mb-2 text-sm font-medium text-color-secondary">
         Nota (1 – 10) <span class="text-red-500">*</span>
       </label>
@@ -171,7 +210,7 @@
     </div>
 
     <!-- COMENTARIOS -->
-    <div class="field mb-0">
+    <div class="field mb-0 mt-2">
       <label class="block mb-2 text-sm font-medium text-color-secondary">
         Comentarios
       </label>

@@ -1,11 +1,11 @@
 <div class="d-flex" style="min-height: 100vh;">
 
   <!-- SIDEBAR -->
-  <nav class="d-flex flex-column bg-dark text-white p-3" style="width: 70px;">
+  <nav class="d-flex flex-column bg-dark text-white p-2" style="width: 200px;">
 
     <div class="text-center mb-4">
       <h5 class="fw-bold"><i class="pi pi-building-columns"></i></h5>
-      <span class="badge bg-success mt-1">{{ auth.getUser()?.roleName }}s</span>
+      <span class="badge bg-success mt-1">{{ auth.getUser()?.roleName }}</span>
     </div>
 
     <ul class="nav flex-column gap-1 flex-grow-1">
@@ -15,7 +15,7 @@
         <a class="nav-link text-white rounded px-3 py-2"
            routerLink="/sistema/dashboard"
            routerLinkActive="bg-success">
-        <i class="pi pi-chart-bar"></i>
+        <i class="pi pi-chart-bar m-2"></i>Dashboard
         </a>
       </li>
 
@@ -24,7 +24,7 @@
         <a class="nav-link text-white rounded px-3 py-2"
            routerLink="/sistema/admin/usuarios"
            routerLinkActive="bg-success">
-          <i class="pi pi-users"></i> 
+          <i class="pi pi-users m-2"></i>Usuarios
         </a>
       </li>
 
@@ -32,7 +32,7 @@
         <a class="nav-link text-white rounded px-3 py-2"
            routerLink="/sistema/admin/tutores"
            routerLinkActive="bg-success">
-          <i class="pi pi-user"></i> 
+          <i class="pi pi-user m-2"></i>Tutores
         </a>
       </li>
 
@@ -41,7 +41,7 @@
         <a class="nav-link text-white rounded px-3 py-2"
            routerLink="/sistema/asistencia"
            routerLinkActive="bg-success">
-          <i class="pi pi-check"></i> 
+          <i class="pi pi-check m-2"></i>Asistencia
         </a>
       </li>
 
@@ -49,15 +49,7 @@
         <a class="nav-link text-white rounded px-3 py-2"
            routerLink="/sistema/ninos"
            routerLinkActive="bg-success">
-        <i class="pi pi-id-card"></i>
-        </a>
-      </li>
-
-       <li *ngIf="auth.isAdmin() || auth.isMaestro() || auth.isPadre()">
-        <a class="nav-link text-white rounded px-3 py-2"
-           routerLink="/sistema/documentos"
-           routerLinkActive="bg-success">
-         <i class="pi pi-file"></i>
+        <i class="pi pi-id-card m-2"></i>Niños
         </a>
       </li>
       
@@ -65,22 +57,22 @@
         <a class="nav-link text-white rounded px-3 py-2"
            routerLink="/sistema/bitacora"
            routerLinkActive="bg-success">
-        <i class="pi pi-book"></i>
+        <i class="pi pi-book m-2"></i>Bitacora
         </a>
       </li>
-<li *ngIf="auth.isAdmin() || auth.isMaestro() || auth.isPadre()">
+<li *ngIf="auth.isAdmin() || auth.isMaestro()">
   <a class="nav-link text-white rounded px-3 py-2"
      routerLink="/sistema/notas"
      routerLinkActive="bg-success">
-   <i class="pi pi-list"></i> 
+   <i class="pi pi-list m-2"></i>Notas
   </a>
 </li>
       
-      <li *ngIf="auth.isPadre() || auth.isAdmin()">
+      <li *ngIf="auth.isPadre()">
         <a class="nav-link text-white rounded px-3 py-2"
            routerLink="/sistema/mis-ninos"
            routerLinkActive="bg-success">
-          <i class="pi pi-heart"></i>
+          <i class="pi pi-heart m-2"></i>Mis niños
         </a>
       </li>
 

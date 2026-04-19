@@ -98,27 +98,33 @@
 
       <div class="col-12 md:col-6">
         <label class="block mb-2 text-sm font-medium text-color-secondary">ID Usuario</label>
-        <input pInputText [(ngModel)]="tutor.idUsuario" class="w-full" />
+        <input pInputText [(ngModel)]="tutor.idUsuario" class=" m-2 w-full" />
       </div>
 
-      <div class="col-12 md:col-6">
-        <label class="block mb-2 text-sm font-medium text-color-secondary">Teléfono</label>
-        <input pInputText [(ngModel)]="tutor.telefono" class="w-full" />
-      </div>
+    <div class="col-12 md:col-6">
+  <label class="block mb-2 text-sm font-medium text-color-secondary">Teléfono</label>
+  <input 
+    pInputText 
+    [(ngModel)]="tutor.telefono" 
+    class=" m-2 w-full"
+    (keypress)="soloNumeros($event)"
+    inputmode="numeric"
+  />
+</div>
 
       <div class="col-12 md:col-6">
         <label class="block mb-2 text-sm font-medium text-color-secondary">Nombre</label>
-        <input pInputText [(ngModel)]="tutor.nombre" class="w-full" />
+        <input pInputText [(ngModel)]="tutor.nombre" class=" m-2 w-full" />
       </div>
 
       <div class="col-12 md:col-6">
         <label class="block mb-2 text-sm font-medium text-color-secondary">Apellido</label>
-        <input pInputText [(ngModel)]="tutor.apellido" class="w-full" />
+        <input pInputText [(ngModel)]="tutor.apellido" class=" m-2 w-full" />
       </div>
 
       <div class="col-12">
         <label class="block mb-2 text-sm font-medium text-color-secondary">Dirección</label>
-        <input pInputText [(ngModel)]="tutor.direccion" class="w-full" />
+        <input pInputText [(ngModel)]="tutor.direccion" class="m-2 w-full" />
       </div>
 
     </div>
