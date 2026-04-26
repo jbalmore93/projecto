@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { Ninos } from '../interfaces/nino';
+import { Usuario } from '../interfaces/usuario';
 
 @Injectable({
   providedIn: 'root',
@@ -43,10 +44,10 @@ export class Servicio {
   }
 }
 
-  async obtenerUsuarios(): Promise<any[]> {
+  async obtenerUsuarios(): Promise<Usuario[]> {
     try {
       const data = await firstValueFrom(
-        this.http.get<any[]>('admin/usuarios', { withCredentials: true })
+        this.http.get<Usuario[]>('admin/usuarios', { withCredentials: true })
       );
       return data;
     } catch (error) {
@@ -54,8 +55,35 @@ export class Servicio {
     }
   }
 
+  async editarPasswordUsuario(id: number, password: string) {
+  try {
+    const res = await firstValueFrom(
+      this.http.put(`admin/usuarios/${id}/password`, { password }, { withCredentials: true })
+    );
+    return res;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async desbloquearUsuario(id: number) {
+  return await firstValueFrom(
+    this.http.put(`admin/usuarios/${id}/unlock`, {}, { withCredentials: true })
+  );
+}
  
-  async obtenerBitacora(idNino: number): Promise<Ninos[]> {
+async crearUsuario(data: any) {
+  try {
+    const res = await firstValueFrom(
+      this.http.post('auth/register', data, { withCredentials: true })
+    );
+    return res;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async obtenerBitacora(idNino: number): Promise<Ninos[]> {
   try {
     const data = await firstValueFrom(
       this.http.get<Ninos[]>(`padre/ninos/${idNino}/bitacora`, { withCredentials: true })
@@ -98,16 +126,7 @@ async crearBitacora(data: any) {
   return res;
 
 }
-async crearUsuario(data: any) {
-  try {
-    const res = await firstValueFrom(
-      this.http.post('auth/register', data, { withCredentials: true })
-    );
-    return res;
-  } catch (error) {
-    throw error;
-  }
-}
+
 
 async checkin(idNino: number) {
   try {
@@ -157,6 +176,22 @@ async eliminarTutor(id: number) {
   return await firstValueFrom(
     this.http.delete(`tutores/${id}`, { withCredentials: true })
   );
+}
+
+async idusuario(): Promise<{ label: string, value: number }[]> {
+  try {
+    const data = await firstValueFrom(
+      this.http.get<{ IdUsuario: number; Email: string }[]>('idusuario', { withCredentials: true })
+    );
+
+    return data.map(u => ({
+      label: u.Email,     
+      value: u.IdUsuario   
+    }));
+
+  } catch (error) {
+    throw error;
+  }
 }
 
 }

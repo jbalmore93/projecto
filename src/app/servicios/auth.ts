@@ -54,4 +54,34 @@ export class AuthService {
     this.user = null;
   }
 
+  async obtenerAvisos(): Promise<any[]> {
+  return await firstValueFrom(
+    this.http.get<any[]>('avisos', { withCredentials: true })
+  );
+}
+
+async obtenerAviso(id: number): Promise<any> {
+  return await firstValueFrom(
+    this.http.get<any>(`avisos/${id}`, { withCredentials: true })
+  );
+}
+
+async crearAviso(data: any) {
+  return await firstValueFrom(
+    this.http.post('avisos', data, { withCredentials: true })
+  );
+}
+
+async actualizarAviso(id: number, data: any) {
+  return await firstValueFrom(
+    this.http.put(`avisos/${id}`, data, { withCredentials: true })
+  );
+}
+
+async eliminarAviso(id: number) {
+  return await firstValueFrom(
+    this.http.delete(`avisos/${id}`, { withCredentials: true })
+  );
+}
+
 }

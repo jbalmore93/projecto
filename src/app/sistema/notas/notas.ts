@@ -10,12 +10,9 @@ import { DialogModule } from 'primeng/dialog';
 import { Select } from 'primeng/select';
 import { Tag } from 'primeng/tag';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { TooltipModule } from 'primeng/tooltip';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { Nota, NotaConNino } from '../../interfaces/nota';
-import { label } from '@primeuix/themes/aura/metergroup';
-import { value } from '@primeuix/themes/aura/knob';
+import { NotaCompetencia } from '../../interfaces/nota';
 
 @Component({
   selector: 'app-notas',
@@ -23,140 +20,49 @@ import { value } from '@primeuix/themes/aura/knob';
     CommonModule, FormsModule, FloatLabelModule,
     TableModule, ButtonModule, MessageModule,
     DialogModule, Select, Tag,
-    InputTextModule, InputNumberModule, TooltipModule
+    InputTextModule, TooltipModule
   ],
   templateUrl: './notas.html',
 })
 export class NotasComponent implements OnInit {
 
-  cargando : boolean = false;
-  guardando : boolean = false;
-  error : string = '';
-  mensaje : string = '';
-  filtro : string = '';
-  Arreglonivel: { label: string, value: number }[] = [];
-  
+  cargando = false;
+  guardando = false;
+  error = '';
+  mensaje = '';
+  filtro = '';
 
+  // Listas
+  Arreglonivel: { label: string, value: number }[] = [];
+  competencias: { label: string, value: number }[] = [];
+  criterios: { label: string, value: number }[] = [];
+
+  // Filtros tabla
+  filtroNivelId: number | null = null;
   filtroIdNino: number | null = null;
 
-  severidad : string = '';
-
-  notas: NotaConNino[] = [];
-  notasFiltradas: NotaConNino[] = [];
-  notaAEliminar: NotaConNino | null = null;
+  notas: NotaCompetencia[] = [];
+  notasFiltradas: NotaCompetencia[] = [];
+  notaAEliminar: NotaCompetencia | null = null;
   editandoId: number | null = null;
 
   modalVisible = false;
   modalEliminarVisible = false;
 
-  filtroNino = '';
-  filtroAmbito = '';
-
   form: any = this.formVacio();
   errorForm = '';
-  
-private ambitoKeyMap: { [key: string]: string } = {
-  // Social
-  'Identidad y Autonomía': 'social',
-  'Habilidades Socioemocionales': 'social',
-  'Convivencia': 'social',
 
-  // Explora
-  'Pensamiento Científico': 'explora',
-  'Pensamiento Tecnológico y Computacional': 'explora',
-  'Pensamiento Lógico Matemático': 'explora',   // ← sin guión
-  'Pensamiento Lógico-Matemático': 'explora',   // ← con guión (por si acaso)
-
-  // Estética
-  'Expresión Musical': 'estetica',
-  'Expresión Plástica y Visual': 'estetica',
-  'Expresión Dramática': 'estetica',
-
-  // Lenguaje
-  'Lenguaje Oral': 'lenguaje',
-  'Lenguaje No Verbal': 'lenguaje',
-  'Lectura y Escritura': 'lenguaje',
-  'Comunicación y Lenguaje': 'lenguaje',   // ← este faltaba
-
-  // Cuerpo
-  'Cuerpo, Imagen y Percepción': 'cuerpo',
-  'Movimiento y Expresión Corporal': 'cuerpo',
-  'Bienestar Físico': 'cuerpo',
-};
-
-
-ambitoKeyDe(competencia: string): string {
-  return this.ambitoKeyMap[competencia] ?? '';
-}
-  // Ámbitos para el filtro
-  ambitoOpciones = [
-    { label: 'Relaciones Sociales y Afectivas',      value: 'social'   },
-    { label: 'Exploración y Experimentación',         value: 'explora'  },
-    { label: 'Estéticas y Creativas',                 value: 'estetica' },
-    { label: 'Lenguaje, Comunicación y Expresión',    value: 'lenguaje' },
-    { label: 'Cuerpo, Movimiento y Bienestar Físico', value: 'cuerpo'   },
+  filtros = [
+    { label: 'Niño',  value: '1' },
+    { label: 'Nivel', value: '2' }
   ];
 
-filtros = [
-    { label: 'Niño',      value: '1'   },
-    { label: 'Nivel',         value: '2'  }
+  resultadoOpciones = [
+    { label: 'Si',    value: 'Si'    },
+    { label: 'No', value: 'No' }
   ];
 
-
-
-  // Competencias agrupadas por ámbito
-  competenciaOpciones = [
-    { label: '🤝 Identidad y Autonomía',                   value: 'Identidad y Autonomía'                   },
-    { label: '🤝 Habilidades Socioemocionales',             value: 'Habilidades Socioemocionales'             },
-    { label: '🤝 Convivencia',                              value: 'Convivencia'                              },
-    { label: '🔬 Pensamiento Científico',                   value: 'Pensamiento Científico'                   },
-    { label: '🔬 Pensamiento Tecnológico y Computacional',  value: 'Pensamiento Tecnológico y Computacional'  },
-    { label: '🔬 Pensamiento Lógico-Matemático',            value: 'Pensamiento Lógico-Matemático'            },
-    { label: '🎨 Expresión Musical',                        value: 'Expresión Musical'                        },
-    { label: '🎨 Expresión Plástica y Visual',              value: 'Expresión Plástica y Visual'              },
-    { label: '🎨 Expresión Dramática',                      value: 'Expresión Dramática'                      },
-    { label: '💬 Lenguaje Oral',                            value: 'Lenguaje Oral'                            },
-    { label: '💬 Lenguaje No Verbal',                       value: 'Lenguaje No Verbal'                       },
-    { label: '💬 Lectura y Escritura',                      value: 'Lectura y Escritura'                      },
-    { label: '🏃 Cuerpo, Imagen y Percepción',              value: 'Cuerpo, Imagen y Percepción'              },
-    { label: '🏃 Movimiento y Expresión Corporal',          value: 'Movimiento y Expresión Corporal'          },
-    { label: '🏃 Bienestar Físico',                         value: 'Bienestar Físico'                         },
-  ];
-
-  // Mapa competencia → ámbito para mostrar el tag en tabla
-  private ambitoMap: { [key: string]: string } = {
-  // Social
-  'Identidad y Autonomía': 'Social',
-  'Habilidades Socioemocionales': 'Social',
-  'Convivencia': 'Social',
-
-  // Explora
-  'Pensamiento Científico': 'Explora',
-  'Pensamiento Tecnológico y Computacional': 'Explora',
-  'Pensamiento Lógico Matemático': 'Explora',   // sin guión (backend)
-  'Pensamiento Lógico-Matemático': 'Explora',   // con guión (por si acaso)
-
-  // Estética
-  'Expresión Musical': 'Estética',
-  'Expresión Plástica y Visual': 'Estética',
-  'Expresión Dramática': 'Estética',
-
-  // Lenguaje
-  'Lenguaje Oral': 'Lenguaje',
-  'Lenguaje No Verbal': 'Lenguaje',
-  'Lectura y Escritura': 'Lenguaje',
-  'Comunicación y Lenguaje': 'Lenguaje',   // ← visto en tu BD
-
-  // Cuerpo
-  'Cuerpo, Imagen y Percepción': 'Cuerpo',
-  'Movimiento y Expresión Corporal': 'Cuerpo',
-  'Bienestar Físico': 'Cuerpo',
-};
-
-  constructor(
-    public auth: AuthService,
-    private servicio: NotaService
-  ) {}
+  constructor(public auth: AuthService, private servicio: NotaService) {}
 
   async ngOnInit() {
     await this.cargarNotas();
@@ -168,123 +74,171 @@ filtros = [
     this.error = '';
     try {
       this.notas = await this.servicio.getNotasCompetencias();
-      this.aplicarFiltros();
+      this.notasFiltradas = [...this.notas];
     } catch (err) {
-      this.error = 'Error al cargar las notas';
-      console.error(err);
+      this.error = 'Error al cargar las evaluaciones';
     } finally {
       this.cargando = false;
     }
   }
 
   async cargarNiveles() {
-    this.cargando = true;
-    this.error = '';
     try {
       this.Arreglonivel = await this.servicio.getniveles();
-      console.log('Niveles cargados:', this.Arreglonivel);
     } catch (err) {
       this.error = 'Error al cargar los niveles';
-      console.error(err);
-    } finally {
-      this.cargando = false;
     }
   }
 
+  // ── SELECTS ENCADENADOS FORMULARIO ──
+
+  async onNivelFormChange() {
+    this.competencias = [];
+    this.criterios = [];
+    this.form.idCompetencia = null;
+    this.form.idReq = null;
+    this.form.opciones = null;
+    if (!this.form.idNivel) return;
+    try {
+      this.competencias = await this.servicio.getCompetencias(this.form.idNivel);
+    } catch (err) {
+      this.errorForm = 'Error al cargar competencias';
+    }
+  }
+
+  async onCompetenciaFormChange() {
+    this.criterios = [];
+    this.form.idReq = null;
+    this.form.opciones = null;
+    if (!this.form.idCompetencia) return;
+    try {
+      this.criterios = await this.servicio.getCriterios(this.form.idCompetencia);
+    } catch (err) {
+      this.errorForm = 'Error al cargar criterios';
+    }
+  }
+
+  // ── FILTRO NIÑO ──
 
   async buscarPorNino() {
-  this.error = '';
-  try {
-    if (!this.filtroIdNino) {
-      this.notas = await this.servicio.getNotasCompetencias();
-    } else {
-      this.notas = await this.servicio.getNotasPorNino(this.filtroIdNino);
+    this.error = '';
+    try {
+      if (!this.filtroIdNino) {
+        this.notas = await this.servicio.getNotasCompetencias();
+      } else {
+        this.notas = await this.servicio.getNotasPorNino(this.filtroIdNino);
+      }
+      this.notasFiltradas = [...this.notas];
+    } catch (err) {
+      this.error = 'No se encontraron evaluaciones para ese niño.';
+      this.notas = [];
+      this.notasFiltradas = [];
     }
-    this.aplicarFiltros();
-  } catch (err) {
-    this.error = 'No se encontraron notas para ese niño.';
-    this.notas = [];
-    this.notasFiltradas = [];
-  }
-}
-
-aplicarFiltros() {
-  this.notasFiltradas = this.notas.filter(n =>
-    !this.filtroAmbito || this.ambitoKeyDe(n.Competencia) === this.filtroAmbito,
- 
-  );
-  console.log('Notas filtradas:', this.notasFiltradas);
-}
-
-  ambitoDe(competencia: string): string {
-    return this.ambitoMap[competencia] ?? '—';
   }
 
-  severidadNota(nota: number): 'success' | 'info' | 'warn' | 'danger' {
-  if (nota >= 9) return 'success';
-  if (nota >= 7) return 'info';
-  if (nota >= 5) return 'warn';
-  return 'danger';
-}
+  // ── FILTRO NIVEL ──
 
-  // ── MODAL NUEVA ──
+  async onNivelFiltroChange() {
+    this.error = '';
+    try {
+      if (!this.filtroNivelId) {
+        this.notas = await this.servicio.getNotasCompetencias();
+      } else {
+        this.notas = await this.servicio.getNotasPorNivel(this.filtroNivelId);
+      }
+      this.notasFiltradas = [...this.notas];
+    } catch (err) {
+      this.error = 'No se encontraron evaluaciones para ese nivel.';
+      this.notas = [];
+      this.notasFiltradas = [];
+    }
+  }
+
+  severidadResultado(resultado: string): 'success' | 'warn' | 'danger' {
+    if (resultado === 'Si')    return 'success';
+    if (resultado === 'No') return 'warn';
+    return 'danger';
+  }
+
+  // ── MODAL ──
+
   abrirModalNueva() {
     this.editandoId = null;
     this.form = this.formVacio();
+    this.competencias = [];
+    this.criterios = [];
     this.errorForm = '';
     this.modalVisible = true;
   }
 
-  // ── GUARDAR / EDITAR ──
   async guardarNota() {
-    if (!this.form.idNino || !this.form.competencia || !this.form.nota) {
-      this.errorForm = 'ID Niño, competencia y nota son obligatorios.';
+    if (!this.form.idNino || !this.form.idNivel || !this.form.idCompetencia || !this.form.idReq || !this.form.opciones) {
+      this.errorForm = 'Todos los campos son obligatorios.';
       return;
     }
+
     this.guardando = true;
     this.errorForm = '';
+console.log(this.form.idCompetencia);
     try {
       if (this.editandoId) {
         await this.servicio.actualizarNota(this.editandoId, {
-          competencia: this.form.competencia,
-          nota: this.form.nota,
-          comentarios: this.form.comentarios || null
+          idNivel:        this.form.idNivel,
+          idCompetencia:  this.form.idCompetencia,
+          idReq:          this.form.idReq,
+          opciones:       this.form.opciones
         });
-        this.mensaje = 'Nota actualizada correctamente';
+        this.mensaje = 'Evaluación actualizada correctamente';
       } else {
         await this.servicio.crearNota({
-          idNino: this.form.idNino,
-          competencia: this.form.competencia,
-          nota: this.form.nota,
-          comentarios: this.form.comentarios || null
+          idNino:         this.form.idNino,
+          idNivel:        this.form.idNivel,
+          idCompetencia:  this.form.idCompetencia,
+          idReq:          this.form.idReq,
+          opciones:       this.form.opciones
         });
-        this.mensaje = 'Nota registrada correctamente';
+        this.mensaje = 'Evaluación registrada correctamente';
       }
       this.modalVisible = false;
       await this.cargarNotas();
     } catch (err: any) {
-      this.errorForm = err?.error?.error ?? 'Error al guardar la nota';
-      console.error(err);
+      this.errorForm = err?.error?.error ?? 'Error al guardar la evaluación';
     } finally {
       this.guardando = false;
     }
   }
 
-  // ── EDITAR ──
-  editarNota(nota: any) {
-    this.editandoId = nota.IdNota;
-    this.form = {
-      idNino: nota.IdNino,
-      competencia: nota.Competencia,
-      nota: nota.Nota,
-      comentarios: nota.Comentarios ?? ''
-    };
-    this.errorForm = '';
-    this.modalVisible = true;
+async editarNota(n: any) {
+  const data = await this.servicio.obtenerNota(n.id_nota);
+  this.competencias = [];
+  this.criterios = [];
+  this.errorForm = '';
+  this.editandoId = data.id_nota;
+
+  try {
+    this.competencias = await this.servicio.getCompetencias(data.idnivel);
+  } catch (err) {
+    this.errorForm = 'Error al cargar competencias';
   }
 
-  // ── ELIMINAR ──
-  pedirEliminar(nota: any) {
+  try {
+    this.criterios = await this.servicio.getCriterios(data.idcompetencia);
+  } catch (err) {
+    this.errorForm = 'Error al cargar criterios';
+  }
+
+  this.form = {
+    idNino:        data.IdNino,
+    idNivel:       data.idnivel,
+    idCompetencia: data.idcompetencia,
+    idReq:         data.idreq,
+    opciones:      data.opciones
+  };
+
+  this.modalVisible = true;
+}
+
+  pedirEliminar(nota: NotaCompetencia) {
     this.notaAEliminar = nota;
     this.modalEliminarVisible = true;
   }
@@ -293,20 +247,25 @@ aplicarFiltros() {
     if (!this.notaAEliminar) return;
     this.guardando = true;
     try {
-      await this.servicio.eliminarNota(this.notaAEliminar.idnota);
-      this.mensaje = 'Nota eliminada correctamente';
+      await this.servicio.eliminarNota(this.notaAEliminar.id_nota);
+      this.mensaje = 'Evaluación eliminada correctamente';
       this.modalEliminarVisible = false;
       this.notaAEliminar = null;
       await this.cargarNotas();
     } catch (err) {
-      this.error = 'Error al eliminar la nota';
-      console.error(err);
+      this.error = 'Error al eliminar la evaluación';
     } finally {
       this.guardando = false;
     }
   }
 
   private formVacio() {
-    return { idNino: null, competencia: '', nota: null, comentarios: '' };
+    return {
+      idNino:        null,
+      idNivel:       null,
+      idCompetencia: null,
+      idReq:         null,
+      opciones:      null
+    };
   }
 }

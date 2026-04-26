@@ -98,7 +98,14 @@
 
       <div class="col-12 md:col-6">
         <label class="block mb-2 text-sm font-medium text-color-secondary">ID Usuario</label>
-        <input pInputText [(ngModel)]="tutor.idUsuario" class=" m-2 w-full" />
+     
+   <p-select 
+  [options]="Idusu"
+  [(ngModel)]="tutor.idUsuario"
+  optionLabel="label"
+  placeholder="Seleccione usuario"
+  class="w-full">
+</p-select>
       </div>
 
     <div class="col-12 md:col-6">

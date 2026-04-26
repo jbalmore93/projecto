@@ -74,3 +74,11 @@ html, body {
 .p-datatable .p-datatable-thead > tr > th {
   color: #ffffff; /* o negro si cambias el header */
 }
+
+body .p-component-overlay {
+    z-index: 1000;
+}
+
+body .p-select-overlay {
+    z-index: 1100 !important;
+}

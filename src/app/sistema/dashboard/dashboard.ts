@@ -29,35 +29,10 @@ export class Dashboard implements OnInit {
 
   dialogVisible = false;
 
-  imagenes = [
-    {
-      url: '/imagenes/2.jpeg',
-      titulo: 'Día de juegos acuáticos',
-      descripcion: 'Los niños disfrutando en la piscina'
-    },
-    {
-      url: '/imagenes/3.jpeg',
-      titulo: 'Día de juegos acuáticos',
-      descripcion: 'Uno de nuestros niños disfrutando'
-    },
-    {
-      url: '/imagenes/4.jpeg',
-      titulo: 'Día de vacunación',
-      descripcion: 'Se realizó campaña de vacunación'
-    },
-    {
-      url: '/imagenes/9.jpeg',
-      titulo: 'Cumpleaños Directora',
-      descripcion: '¡¡Feliz cumpleaños directora!!'
-    },
-    {
-      url: '/imagenes/5.jpeg',
-      titulo: 'Volvemos de vacaciones',
-      descripcion: 'Regreso a clases'
-    }
-  ];
+  imagenes: any[] = [];
 
   imagenEditando: any = {
+    id: null,
     url: '',
     titulo: '',
     descripcion: ''
@@ -67,33 +42,108 @@ export class Dashboard implements OnInit {
 
   async ngOnInit() {
     await this.auth.loadUser();
+    await this.cargarAvisos(); // 🔥 cargar datos
   }
 
- 
+  // 🔥 CARGAR AVISOS
+  async cargarAvisos() {
+    try {
+      const data = await this.auth.obtenerAvisos();
+
+      this.imagenes = data.map(a => ({
+        id: a.id_aviso,
+        url: a.imagen?.startsWith('data:')
+              ? a.imagen
+              : (a.imagen ? `data:image/jpeg;base64,${a.imagen}` : ''),
+        titulo: a.Titulo,
+        descripcion: a.Contenido
+      }));
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // 🆕 NUEVO AVISO
+  nuevoAviso() {
+    this.imagenEditando = {
+      id: null,
+      url: '',
+      titulo: '',
+      descripcion: ''
+    };
+    this.dialogVisible = true;
+  }
+
+  // ✏️ EDITAR
   editarCarrusel(index: number) {
     this.indexEditando = index;
     this.imagenEditando = { ...this.imagenes[index] };
     this.dialogVisible = true;
   }
 
-  
-  guardarCambios() {
-    this.imagenes[this.indexEditando] = { ...this.imagenEditando };
-    this.dialogVisible = false;
+  // 💾 GUARDAR (CREATE / UPDATE)
+  async guardarCambios() {
+    try {
+
+      const aviso = this.imagenEditando;
+
+      if (aviso.id != null) {
+        // 🔥 UPDATE
+        await this.auth.actualizarAviso(aviso.id, {
+          titulo: aviso.titulo,
+          contenido: aviso.descripcion,
+          imagen: aviso.url
+        });
+      } else {
+        // 🔥 CREATE
+        await this.auth.crearAviso({
+          titulo: aviso.titulo,
+          contenido: aviso.descripcion,
+          imagen: aviso.url
+        });
+      }
+
+      this.dialogVisible = false;
+      await this.cargarAvisos();
+
+    } catch (error) {
+      console.error(error);
+    }
   }
 
-onFileSelect(event: any) {
-  const file = event.target.files[0];
+  // 🗑 ELIMINAR
+  async eliminarAviso(id: number) {
+    if (!confirm('¿Eliminar aviso?')) return;
 
-  if (file) {
-    const reader = new FileReader();
-
-    reader.onload = (e: any) => {
-      this.imagenEditando.url = e.target.result; 
-    };
-
-    reader.readAsDataURL(file);
+    try {
+      await this.auth.eliminarAviso(id);
+      await this.cargarAvisos();
+    } catch (error) {
+      console.error(error);
+    }
   }
-}
+
+  // 📁 SUBIR IMAGEN → BASE64
+  onFileSelect(event: any) {
+    const file = event.target.files[0];
+
+    if (file) {
+
+      // 🔥 VALIDACIÓN (opcional pero recomendada)
+      if (file.size > 1024 * 1024) {
+        alert('La imagen no debe superar 1MB');
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = (e: any) => {
+        this.imagenEditando.url = e.target.result;
+      };
+
+      reader.readAsDataURL(file);
+    }
+  }
 
 }

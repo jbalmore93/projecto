@@ -19,6 +19,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { NinoService } from '../../servicios/nino-service';
 import { Ninos as Nino} from '../../interfaces/nino';
+import { NotaService } from '../../servicios/nota-service';
 
 @Component({
   selector: 'app-ninos',
@@ -48,14 +49,10 @@ export class Ninos implements OnInit {
   error = '';
 
  
-  mostrarModal = false;
-  mostrarDetalle = false;
+mostrarModal = false;
+mostrarDetalle = false;
 
- grupos = [
-  { label: 'Maternal 1', value: 'Maternal 1' },
-  { label: 'Maternal 2', value: 'Maternal 2' },
-  { label: 'Maternal 3', value: 'Maternal 3' }
-];
+grupos: { label: string, value: number }[] = [];
 
   form = {
     idTutor: null as number | null,
@@ -74,13 +71,24 @@ export class Ninos implements OnInit {
 
   constructor(
     private servicio: NinoService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private gruposervice : NotaService
   ) {}
 
   async ngOnInit() {
     await this.cargarNinos();
+    await this.cargarGrupos();
   }
-/* CARGAR NIÑOS */
+
+  async cargarGrupos() {
+    try {
+      this.grupos = await this.gruposervice.getniveles();
+
+    } catch (error) {
+      console.error('Error al cargar grupos:', error);
+    }
+  }
+
   async cargarNinos() {
     this.cargando = true;
     this.error = '';

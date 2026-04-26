@@ -9,25 +9,26 @@ import { FormsModule } from '@angular/forms';
 import {  CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { Message } from 'primeng/message';
+import { Select } from 'primeng/select';
 
 
 @Component({
   selector: 'app-tutor',
   imports: [TableModule, ButtonModule, 
-    DialogModule, InputTextModule, FormsModule, CommonModule, Message],
+    DialogModule, InputTextModule, FormsModule, CommonModule, Message, Select],
   templateUrl: './tutor.html',
   styleUrl: './tutor.css',
 })
 export class Tutor   implements OnInit {
 tutores: any[] = [];
   cargando = false;
-
+  Idusu : {label: string, value: number}[] = [];  
   mostrarModal = false;
   editando = false;
 errorModal = '';
 guardando = false;
   tutor: any = {
-    idUsuario: '',
+    idUsuario: null,
     nombre: '',
     apellido: '',
     telefono: '',
@@ -37,9 +38,18 @@ guardando = false;
 constructor(private servicio: Servicio) {}
 
 
-  async ngOnInit() {
-    this.listar();
+ async ngOnInit() {
+  await this.listar();
+  await this.idusuario();
+}
+async idusuario(){
+  try {
+    this.Idusu = await this.servicio.idusuario();
+    
+  } catch (error) {
+    console.error('Error al cargar usuarios:', error);
   }
+}
 
   async listar() {
     this.cargando = true;
