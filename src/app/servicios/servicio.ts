@@ -120,7 +120,7 @@ async obtenerAsistencias(): Promise<any[]> {
 async crearBitacora(data: any) {
 
   const res = await firstValueFrom(
-    this.http.post('/bitacora', data)
+    this.http.post('bitacora', data)
   );
 
   return res;
@@ -194,4 +194,15 @@ async idusuario(): Promise<{ label: string, value: number }[]> {
   }
 }
 
+
+async obtenerNinos(): Promise<any[]> {
+  try {
+    const data = await firstValueFrom(
+      this.http.get<any[]>('ninos-id', { withCredentials: true })
+    );
+    return data;
+  } catch (error) {
+    throw error;
+  }  
+}     
 }

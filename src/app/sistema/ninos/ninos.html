@@ -130,8 +130,15 @@
     </div>
 
     <div class="col-12 mt-3">
-      <label class="block mb-1">ID Tutor</label>
-      <input pInputText type="number" [(ngModel)]="form.idTutor" class="w-full" />
+      <label class="block mb-1">Tutor</label>
+      <p-select 
+        [options]="tutores"
+        [(ngModel)]="form.idTutor"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        class="w-full">
+      </p-select>
     </div>
 
     <div class="col-12 mt-3">

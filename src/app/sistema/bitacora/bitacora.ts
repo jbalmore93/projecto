@@ -11,6 +11,8 @@ import { Dialog } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import Swal from 'sweetalert2';
+import { StringToken } from '@angular/compiler';
 
 
 @Component({
@@ -37,6 +39,7 @@ export class Bitacora implements OnInit {
   bitacoras: any[] = [];
 mostrarModal = false;
 errorModal = '';
+ninos: { label: String, value: Number }[] = [];
 
 
   estadosAnimo = [
@@ -62,7 +65,20 @@ errorModal = '';
 
   async ngOnInit() {
     await this.cargarBitacoras();
+    await this.cargarNinos();
   }
+
+async cargarNinos() {
+  try {
+    const ninosData = await this.servicio.obtenerNinos();
+    this.ninos = ninosData.map((nino: any) => ({
+      label: `${nino.Nombre} ${nino.Apellido}`,
+      value: nino.IdNino
+    }));
+  } catch (err) {
+    console.error('Error al cargar los niños:', err);
+  }
+}
 
   async cargarBitacoras() {
     this.cargando = true;
@@ -91,7 +107,14 @@ errorModal = '';
         observaciones: '',
         estadoAnimo: ''
       };
-      await this.cargarBitacoras(); // refresca la tabla al guardar
+       this.mostrarModal = false;
+       Swal.fire({
+        icon: 'success',
+        title: '¡Bitacora almacenada correctamente!',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      await this.cargarBitacoras();
     } catch (err) {
       this.error = 'Error al registrar la bitácora';
       console.error(err);

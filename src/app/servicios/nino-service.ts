@@ -55,7 +55,20 @@ async registrarNino(data: {
   }
 }
 
-async actualizarNino(id: number, data: {
+async idtutor(): Promise<any[]> {
+  try {
+    const data = await firstValueFrom(
+      this.http.get<any[]>('tutores', { withCredentials: true })
+    );
+    return data;
+  } catch (error) { 
+    throw error;
+  }
+}
+
+
+
+      async actualizarNino(id: number, data: {
   idTutor: number;
   nombre: string;
   apellido: string;

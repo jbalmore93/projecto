@@ -7,6 +7,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../servicios/auth';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,7 +29,6 @@ export class Dashboard implements OnInit {
   constructor(public auth: AuthService) {}
 
   dialogVisible = false;
-
   imagenes: any[] = [];
 
   imagenEditando: any = {
@@ -38,19 +38,19 @@ export class Dashboard implements OnInit {
     descripcion: ''
   };
 
-  indexEditando = 0;
+  // ── Errores de validación ──
+  errores: { titulo?: string; descripcion?: string; imagen?: string } = {};
 
   async ngOnInit() {
     await this.auth.loadUser();
-    await this.cargarAvisos(); // 🔥 cargar datos
+    await this.cargarAvisos();
   }
 
-  // 🔥 CARGAR AVISOS
+  // ── CARGAR ──
   async cargarAvisos() {
     try {
       const data = await this.auth.obtenerAvisos();
-
-      this.imagenes = data.map(a => ({
+      this.imagenes = data.map((a: any) => ({
         id: a.id_aviso,
         url: a.imagen?.startsWith('data:')
               ? a.imagen
@@ -58,50 +58,72 @@ export class Dashboard implements OnInit {
         titulo: a.Titulo,
         descripcion: a.Contenido
       }));
-
     } catch (error) {
       console.error(error);
     }
   }
 
-  // 🆕 NUEVO AVISO
+  // ── NUEVO ──
   nuevoAviso() {
-    this.imagenEditando = {
-      id: null,
-      url: '',
-      titulo: '',
-      descripcion: ''
-    };
+    this.imagenEditando = { id: null, url: '', titulo: '', descripcion: '' };
+    this.errores = {};
     this.dialogVisible = true;
   }
 
-  // ✏️ EDITAR
-  editarCarrusel(index: number) {
-    this.indexEditando = index;
-    this.imagenEditando = { ...this.imagenes[index] };
+  // ── EDITAR — recibe el objeto img completo ──
+  editarCarrusel(img: any) {
+    console.log('Editando aviso con id:', img.id); // 👈 verifica en consola
+    this.imagenEditando = { ...img };              // spread copia id, url, titulo, descripcion
+    this.errores = {};
     this.dialogVisible = true;
   }
 
-  // 💾 GUARDAR (CREATE / UPDATE)
+  // ── VALIDAR ──
+  private validar(): boolean {
+    this.errores = {};
+
+    if (!this.imagenEditando.titulo?.trim()) {
+      this.errores.titulo = 'El título es obligatorio.';
+    } else if (this.imagenEditando.titulo.trim().length < 3) {
+      this.errores.titulo = 'El título debe tener al menos 3 caracteres.';
+    }
+
+    if (!this.imagenEditando.descripcion?.trim()) {
+      this.errores.descripcion = 'La descripción es obligatoria.';
+    } else if (this.imagenEditando.descripcion.trim().length < 5) {
+      this.errores.descripcion = 'La descripción debe tener al menos 5 caracteres.';
+    }
+
+    if (!this.imagenEditando.url) {
+      this.errores.imagen = 'Debes seleccionar una imagen.';
+    }
+
+    return Object.keys(this.errores).length === 0;
+  }
+
+  // ── GUARDAR ──
   async guardarCambios() {
-    try {
+    if (!this.validar()) return;
 
+    try {
       const aviso = this.imagenEditando;
 
       if (aviso.id != null) {
-        // 🔥 UPDATE
+        // UPDATE
         await this.auth.actualizarAviso(aviso.id, {
-          titulo: aviso.titulo,
-          contenido: aviso.descripcion,
-          imagen: aviso.url
+          titulo:    aviso.titulo.trim(),
+          contenido: aviso.descripcion.trim(),
+          imagen:    aviso.url
         });
+        Swal.fire('¡Actualizado!', 'El aviso fue actualizado correctamente.', 'success');
       } else {
-        // 🔥 CREATE
+        // CREATE
         await this.auth.crearAviso({
-          titulo: aviso.titulo,
-          contenido: aviso.descripcion,
-          imagen: aviso.url
+          titulo:    aviso.titulo.trim(),
+          contenido: aviso.descripcion.trim(),
+          imagen:    aviso.url
         });
+        Swal.fire('¡Creado!', 'El aviso fue creado correctamente.', 'success');
       }
 
       this.dialogVisible = false;
@@ -109,41 +131,54 @@ export class Dashboard implements OnInit {
 
     } catch (error) {
       console.error(error);
+      Swal.fire('Error', 'Ocurrió un error al guardar el aviso.', 'error');
     }
   }
 
-  // 🗑 ELIMINAR
+  // ── ELIMINAR ──
   async eliminarAviso(id: number) {
-    if (!confirm('¿Eliminar aviso?')) return;
-
-    try {
-      await this.auth.eliminarAviso(id);
-      await this.cargarAvisos();
-    } catch (error) {
-      console.error(error);
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¡No podrás revertir esto!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await this.auth.eliminarAviso(id);
+          await this.cargarAvisos();
+          Swal.fire('¡Eliminado!', 'El aviso ha sido eliminado.', 'success');
+        } catch (error) {
+          console.error(error);
+          Swal.fire('Error', 'No se pudo eliminar el aviso.', 'error');
+        }
+      }
+    });
   }
 
-  // 📁 SUBIR IMAGEN → BASE64
+  // ── SUBIR IMAGEN → BASE64 ──
   onFileSelect(event: any) {
     const file = event.target.files[0];
+    if (!file) return;
 
-    if (file) {
-
-      // 🔥 VALIDACIÓN (opcional pero recomendada)
-      if (file.size > 1024 * 1024) {
-        alert('La imagen no debe superar 1MB');
-        return;
-      }
-
-      const reader = new FileReader();
-
-      reader.onload = (e: any) => {
-        this.imagenEditando.url = e.target.result;
-      };
-
-      reader.readAsDataURL(file);
+    if (file.size > 1024 * 1024) {
+      this.errores.imagen = 'La imagen no debe superar 1 MB.';
+      return;
     }
-  }
 
+    if (!file.type.startsWith('image/')) {
+      this.errores.imagen = 'El archivo debe ser una imagen.';
+      return;
+    }
+
+    this.errores.imagen = undefined;
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.imagenEditando.url = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
 }

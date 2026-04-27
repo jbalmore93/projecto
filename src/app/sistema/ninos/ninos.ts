@@ -47,7 +47,7 @@ export class Ninos implements OnInit {
   ninos: Nino[] = [];
   cargando = true;
   error = '';
-
+  tutores: { label: string, value: number }[] = [];
  
 mostrarModal = false;
 mostrarDetalle = false;
@@ -77,7 +77,22 @@ grupos: { label: string, value: number }[] = [];
 
   async ngOnInit() {
     await this.cargarNinos();
+    await this.cargarTutores();
     await this.cargarGrupos();
+  }
+
+  async cargarTutores() {
+    try {
+      const tutoresData = await this.servicio.idtutor();
+      console.log(tutoresData);
+      this.tutores = tutoresData.map((tutor: any) => ({ 
+        label: `${tutor.nombre} ${tutor.apellido}`,
+        value: tutor.idTutor
+      }));
+      console.log('Tutores cargados:', this.tutores);
+    } catch (error) {
+      console.error('Error al cargar tutores:', error);
+    }
   }
 
   async cargarGrupos() {
