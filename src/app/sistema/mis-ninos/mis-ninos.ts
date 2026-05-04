@@ -34,6 +34,8 @@ export class MisNinos implements OnInit {
       const { tutor, ninos } = await this.Ninoservicio.obtenerNinos();
       this.tutor = tutor;
       this.ninos = ninos;
+      console.log('Tutor:', this.tutor);
+      console.log('Niños:', this.ninos);
     } catch (err) {
       this.error = 'Error al cargar los datos.';
     } finally {
