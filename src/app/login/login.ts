@@ -35,11 +35,12 @@ export class Login implements OnInit, OnDestroy {
   ngOnInit() {
     this.doc.body.style.backgroundColor = '#1a1a2e';
     this.sessionExpired = this.route.snapshot.queryParamMap.get('sessionExpired') === 'true';
+    this.restaurarBloqueo();
   }
 
   ngOnDestroy() {
     this.doc.body.style.backgroundColor = '';
-    this.limpiarInterval();
+    this.limpiarInterval(); // ← aquí se usa también
   }
 
   get tiempoFormateado(): string {
@@ -55,10 +56,40 @@ export class Login implements OnInit, OnDestroy {
     }
   }
 
-  private iniciarBloqueo(minutos: number = 15) {
+  private restaurarBloqueo() {
+    const bloqueadoHasta = sessionStorage.getItem('bloqueadoHasta');
+    const bloqueadoEmail = sessionStorage.getItem('bloqueadoEmail');
+
+    if (!bloqueadoHasta || !bloqueadoEmail) return;
+
+    const msRestantes = Number(bloqueadoHasta) - Date.now();
+
+    if (msRestantes > 0) {
+      this.usuario = bloqueadoEmail;
+      this.iniciarBloqueo(msRestantes / 1000);
+    } else {
+      sessionStorage.removeItem('bloqueadoHasta');
+      sessionStorage.removeItem('bloqueadoEmail');
+    }
+  }
+
+  async verificarBloqueoServidor(email: string): Promise<void> {
+    if (!email) return;
+    try {
+      const result = await this.servicio.verificarBloqueo(email);
+      if (result.blocked && result.secondsLeft > 0) {
+        this.iniciarBloqueo(result.secondsLeft);
+      }
+    } catch { }
+  }
+
+  private iniciarBloqueo(segundos: number = 900) {
     this.bloqueado = true;
-    this.tiempoRestante = minutos * 60;
-    this.limpiarInterval();
+    this.tiempoRestante = Math.ceil(segundos);
+    this.limpiarInterval(); // ← limpia cualquier interval previo
+
+    sessionStorage.setItem('bloqueadoHasta', String(Date.now() + segundos * 1000));
+    sessionStorage.setItem('bloqueadoEmail', this.usuario);
 
     this.ngZone.runOutsideAngular(() => {
       this.countdownInterval = setInterval(() => {
@@ -68,6 +99,8 @@ export class Login implements OnInit, OnDestroy {
             this.bloqueado = false;
             this.error = '';
             this.limpiarInterval();
+            sessionStorage.removeItem('bloqueadoHasta');
+            sessionStorage.removeItem('bloqueadoEmail');
           }
         });
       }, 1000);
@@ -75,7 +108,15 @@ export class Login implements OnInit, OnDestroy {
   }
 
   async login(form: any) {
-    if (!form.valid || this.bloqueado) return;
+    if (!form.valid) return;
+
+    await this.verificarBloqueoServidor(this.usuario);
+
+    if (this.bloqueado) {
+      this.error = 'Cuenta bloqueada por intentos fallidos. Intenta luego.';
+      this.cargando = false;
+      return;
+    }
 
     this.cargando = true;
     this.error = '';
@@ -85,7 +126,7 @@ export class Login implements OnInit, OnDestroy {
     if (!result.success) {
       this.error = result.error ?? 'Error desconocido';
       if (result.status === 423) {
-        this.iniciarBloqueo(15);
+        this.iniciarBloqueo(900);
       }
     }
 

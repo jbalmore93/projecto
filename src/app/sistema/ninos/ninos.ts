@@ -178,6 +178,7 @@ grupos: { label: string, value: number }[] = [];
     };
 
     try {
+      console.log('Payload a enviar:', payload);
       if (this.modoEdicion && this.ninoEditandoId) {
         await this.servicio.actualizarNino(this.ninoEditandoId, payload);
       } else {

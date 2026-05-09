@@ -70,10 +70,10 @@ export class Dashboard implements OnInit {
     this.dialogVisible = true;
   }
 
-  // ── EDITAR — recibe el objeto img completo ──
+  // ── EDITAR — 
   editarCarrusel(img: any) {
-    console.log('Editando aviso con id:', img.id); // 👈 verifica en consola
-    this.imagenEditando = { ...img };              // spread copia id, url, titulo, descripcion
+    console.log('Editando aviso con id:', img.id); 
+    this.imagenEditando = { ...img };              
     this.errores = {};
     this.dialogVisible = true;
   }
